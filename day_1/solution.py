@@ -43,9 +43,6 @@ def part_2():
   answer = 0
 
   for direction, rotation in data:
-    if rotation == 0:
-      continue
-
     if direction == 'R':
       next_pos = current_pos + rotation
       answer += (next_pos // 100) - (current_pos // 100)
