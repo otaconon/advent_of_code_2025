@@ -13,7 +13,7 @@ pub fn star1(raw_data: String) -> String {
   format!("{}", res)
 }
 
-pub fn star2(raw_data: String) -> String {
+pub fn star(raw_data: String) -> String {
   let mut res = 0;
   let mut ops: Vec<char> = Vec::new();
   let mut nums: Vec<String> = Vec::new();
@@ -68,7 +68,7 @@ pub fn star2(raw_data: String) -> String {
   format!("{}", res)
 }
 
-pub fn star(raw_data: String) -> String {
+pub fn star2(raw_data: String) -> String {
   let lines: Vec<Vec<char>> = raw_data
     .lines()
     .rev()
@@ -81,8 +81,8 @@ pub fn star(raw_data: String) -> String {
   let res = (0..width).rev().filter(|&col| lines[height][col] != ' ').fold(
     0, |acc, left| {
       let cols = (left..right)
-        .map(|row| (0..height)
-        .fold(0, |num, col| {
+        .map(|col| (0..height)
+        .fold(0, |num, row| {
           match lines[row][col].to_digit(10) {
             Some(digit) => 10*num + digit as u128,
             None => num
