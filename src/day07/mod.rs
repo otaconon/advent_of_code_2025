@@ -23,32 +23,21 @@ pub fn star1(raw_data: String) -> String {
 
 pub fn star2(raw_data: String) -> String {
   let (start, grid) = parse_input(&raw_data);
-  let mut beams: Vec<u64> = vec![1; grid[0].len()];
+  let mut beams: Vec<u64> = vec![0; grid[0].len()];
+  beams[start.1] = 1;
 
-  for row in grid.iter().rev() {
+  for row in grid.iter() {
     let mut new_beams = beams.clone();
-    for (beam, cnt) in beams.iter().enumerate() {
-      if row[beam] {
-        new_beams[beam] -= cnt;
-      }
-      if beam < row.len()-1 && row[beam+1] {
-        new_beams[beam+1] += cnt;
-      }
-      if beam > 0 && row[beam-1] {
-        new_beams[beam-1] += cnt;
-      }
+    for (beam, &cnt) in beams.iter().enumerate() {
+      if !row[beam] || cnt == 0 { continue; }
+      if row[beam] { new_beams[beam] -= cnt; }
+      if beam < row.len()-1 { new_beams[beam+1] += cnt; }
+      if beam > 0 { new_beams[beam-1] += cnt; }
     }
     beams = new_beams;
   }
 
-  let mut res = 0;
-  for (beam, cnt) in beams.iter().enumerate() {
-    if beam == start.1 {
-      res += cnt;
-    }
-  } 
-
-  format!("{}", res)
+  format!("{}", beams.iter().sum::<u64>())
 }
 
 fn parse_input(raw_data: &str) -> ((usize, usize), Vec<Vec<bool>>) {
