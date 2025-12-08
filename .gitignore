@@ -2,7 +2,5 @@
 .vscode
 **.exe
 .venv/
-
-# Added by cargo
-
+.idea
 /target
