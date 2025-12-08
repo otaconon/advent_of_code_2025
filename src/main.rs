@@ -2,7 +2,7 @@ use seq_macro::seq;
 use std::env;
 use std::fs;
 
-seq!(N in 06..=07 {
+seq!(N in 06..=08 {
   mod day~N;
 });
 
@@ -19,7 +19,7 @@ fn main() {
     .get(1)
     .expect("Please provide a day number (e.g., '01')");
 
-  seq!(N in 06..=07 {
+  seq!(N in 06..=08 {
     match day_arg.as_str() {
       #(
         stringify!(N) => {
