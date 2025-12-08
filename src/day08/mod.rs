@@ -1,4 +1,7 @@
-use std::{cmp::Ordering, collections::{HashMap, HashSet}};
+use std::{
+  cmp::Ordering,
+  collections::{HashMap, HashSet},
+};
 
 mod point;
 use point::Point;
@@ -8,117 +11,79 @@ use dsu::Dsu;
 
 pub fn star1(raw_data: String) -> String {
   let points = parse_input(&raw_data);
-  let mut closest: HashMap<Point, Vec<Point>> = HashMap::new();
-  for a in &points {
-    let mut neighbors = points.clone();
+  let mut edges: Vec<(f64, Point, Point)> = Vec::with_capacity(points.len() * points.len() / 2);
 
-    neighbors.sort_by(|p1, p2| {
-      let dist1 = a.distance(p1);
-      let dist2 = a.distance(p2);
-
-      dist1.partial_cmp(&dist2).unwrap_or(Ordering::Equal)
-    });
-
-    closest.insert(*a, neighbors);
+  for i in 0..points.len() {
+    for j in (i + 1)..points.len() {
+      let u = points[i];
+      let v = points[j];
+      let dist = u.distance(&v);
+      edges.push((dist, u, v));
+    }
   }
 
+  edges.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(Ordering::Equal));
   let mut adj = Dsu::new();
-  for (point, neighbors) in &mut closest {
-    neighbors.remove(0);
-    adj.add(&point);
+  for p in &points {
+    adj.add(p);
   }
 
-  for _ in 0..1000 {
-    let mut least_distance = f64::MAX;
-    let mut least_neighbors: Option<(Point, Point)> = None;
-    for (point, neighbors) in &closest {
-      if neighbors.is_empty() {
-        continue;
-      }
-      let dist = point.distance(&neighbors[0]);
-      if least_distance > dist {
-        least_distance = dist;
-        least_neighbors = Some((*point, neighbors[0]));
-      }
+  let mut edges_count = 0;
+  for (dist, u, v) in edges {
+    if adj.find(u) != adj.find(v) {
+      adj.union(&u, &v);
+      edges_count += 1;
     }
-    if least_neighbors.is_none() {
-      continue;
-    }
-    let (u, v) = least_neighbors.unwrap();
-    adj.union(&u, &v);
-    closest.get_mut(&u).unwrap().remove(0);
-    closest.get_mut(&v).unwrap().remove(0);
   }
 
   let mut sizes: Vec<i32> = Vec::new();
-  let mut visited: HashSet<Point> = HashSet::new();
+  let mut visited_roots: HashSet<Point> = HashSet::new();
+
   for point in &points {
-    let p = adj.find(*point);
-    if !visited.contains(&p) {
-      sizes.push(adj.size[&p])
+    let root = adj.find(*point);
+    if !visited_roots.contains(&root) {
+      sizes.push(adj.size[&root]);
+      visited_roots.insert(root);
     }
-    visited.insert(p);
   }
 
   sizes.sort_by(|a, b| b.cmp(a));
-  let mut ans = 1;
+  let mut ans: i64 = 1;
   for i in 0..3 {
     if i >= sizes.len() {
       break;
     }
-    ans *= sizes[i];
+    ans *= sizes[i] as i64;
   }
+
   format!("{}", ans)
 }
 
 pub fn star2(raw_data: String) -> String {
   let points = parse_input(&raw_data);
-  let mut closest: HashMap<Point, Vec<Point>> = HashMap::new();
-  for a in &points {
-    let mut neighbors = points.clone();
+  let mut edges: Vec<(f64, Point, Point)> = Vec::with_capacity(points.len() * points.len() / 2);
 
-    neighbors.sort_by(|p1, p2| {
-      let dist1 = a.distance(p1);
-      let dist2 = a.distance(p2);
-
-      dist1.partial_cmp(&dist2).unwrap_or(Ordering::Equal)
-    });
-
-    closest.insert(*a, neighbors);
+  for i in 0..points.len() {
+    for j in (i + 1)..points.len() {
+      let u = points[i];
+      let v = points[j];
+      let dist = u.distance(&v);
+      edges.push((dist, u, v));
+    }
   }
 
+  edges.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(Ordering::Equal));
   let mut adj = Dsu::new();
-  for (point, neighbors) in &mut closest {
-    neighbors.remove(0);
-    adj.add(&point);
+  for p in &points {
+    adj.add(p);
   }
 
-  let mut ans = (Point::new(0.0, 0.0, 0.0), Point::new(0.0, 0.0, 0.0));
-  loop {
-    let mut least_distance = f64::MAX;
-    let mut least_neighbors: Option<(Point, Point)> = None;
-    for (point, neighbors) in &closest {
-      if neighbors.is_empty() {
-        continue;
-      }
-      let dist = point.distance(&neighbors[0]);
-      if least_distance > dist {
-        least_distance = dist;
-        least_neighbors = Some((*point, neighbors[0]));
-      }
+  let mut ans = (Point::new(0.0,0.0,0.0), Point::new(0.0,0.0,0.0));
+  for (dist, u, v) in edges {
+    if adj.find(u) != adj.find(v) {
+      adj.union(&u, &v);
+      ans = (u, v);
     }
-    if least_neighbors.is_none() {
-      break;
-    }
-    let (u, v) = least_neighbors.unwrap();
-    ans = (u, v);
-    adj.union(&u, &v);
-    let x = adj.find(u);
-    if adj.size[&x] == points.len() as i32 {
-      break;
-    }
-    closest.get_mut(&u).unwrap().remove(0);
-    closest.get_mut(&v).unwrap().remove(0);
   }
 
   format!("{}", ans.0.x * ans.1.x)
